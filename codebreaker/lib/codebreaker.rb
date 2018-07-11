@@ -28,8 +28,6 @@ module Codebreaker
 
     def turn(guess)
       unless [:won, :lose].include? @state
-        guess = guess.rstrip.split if guess.is_a? String
-        guess = guess.map(&:to_i) if guess.any? { |c| c.is_a? String }
         submit_guess(guess)
         calculate_result
         change_state
@@ -52,6 +50,7 @@ module Codebreaker
     end
 
     def save_score(file = @score_file)
+      raise 'win first' if @state != :won
       score
       file = File.new(file, 'a') if file.is_a? String
       file.puts("#{@player_name}:#{@dificulty}:#{@score}")
@@ -60,6 +59,8 @@ module Codebreaker
     private
 
     def submit_guess(guess)
+      guess = guess.rstrip.split('') if guess.is_a? String
+      guess = guess.map(&:to_i) if guess.any? { |c| c.is_a? String }
       @tries -= 1
       raise 'max tries exceeded' if @tries < 0
       raise 'guess length ≠ 4' if guess.length != 4
