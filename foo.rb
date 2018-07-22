@@ -27,7 +27,6 @@ module Foo
     def attach(**kwargs)
       kwargs.each_pair do |k, v|
         if v.is_a? Proc
-          p k, v
           define_singleton_method(k, &v)
         else
           define_singleton_method(k) { v }
@@ -97,7 +96,6 @@ module Foo
 
     def call(env)
       hold = Holder.from_request(Rack::Request.new(env))
-      p @attachments
       hold.attach(**@attachments)
       hd, cb, conv = hold.callback_from(@paths)
       return the_404 unless cb

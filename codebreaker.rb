@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative 'foo'
 require 'codebreaker'
 require 'pstore'
@@ -7,7 +8,7 @@ Foo.define do
   default_type :json
   set game_store: PStore.new('codebreaker_games.pstore')
   set login_manager: Foo::AuthManager.new('test')
-  set(:ok) { |content| { status: :ok, content: content } }
+  set(:ok) { |content, **kw| { status: :ok, content: content || kw } }
   set(:not_ok) { |msg| { status: :fail, msg: msg } }
 
   set :wrap do |&block|
@@ -27,8 +28,14 @@ Foo.define do
   set :new_game do |difficulty|
     wrap do
       with_current_game do |game|
-        meth = game ? :play_again : :new
-        game.send(meth, difficulty)
+        if game
+          game.play_again(difficulty)
+        else
+          game_store[session[:name]] = Codebreaker::Game.new(
+            session[:name],
+            difficulty
+          )
+        end
         ok 'ready to play'
       end
     end
@@ -47,6 +54,15 @@ Foo.define do
   get '/start_game/:diff' do |diff|
     login_required
     new_game diff
+  end
+
+  get '/turn/:guess' do |guess|
+    login_required
+    with_current_game do |game|
+      state, match = game.turn(guess.to_s)
+      game.save_score if state == :won
+      ok state: state, match: match
+    end
   end
 
   get '/sign_in/:name/:pass' do |name, pass|
