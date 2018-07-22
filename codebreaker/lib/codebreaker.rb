@@ -22,8 +22,11 @@ module Codebreaker
       initialize_game(dificulty.to_s.rstrip, file)
     end
 
-    def play_again(dificulty = nil)
-      initialize_game(dificulty&.to_s&.rstrip || @dificulty)
+    def play_again(dificulty = nil, file = nil)
+      initialize_game(
+        dificulty&.to_s&.rstrip || @dificulty,
+        file || @score_file_path
+      )
     end
 
     def turn(guess)
