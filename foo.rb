@@ -60,12 +60,13 @@ module Foo
     end
 
     def register(name, pass)
-      return nil if @store[name]
+      return nil if @store[name] || !name || !pass
       @store[name] = Digest::MD5.hexdigest(pass)
       name
     end
 
     def verify(name, pass)
+      return nil unless name || pass
       @store[name] == Digest::MD5.hexdigest(pass) ? name : nil
     end
   end

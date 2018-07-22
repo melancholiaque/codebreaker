@@ -1,4 +1,5 @@
 require_relative 'foo'
+require 'codebreaker'
 
 def not_ok(msg)
   { status: :fail, msg: msg }
@@ -9,15 +10,15 @@ def ok(content)
 end
 
 Foo.define do
+
+  games = {}
+
   get '/', type: :json do
     'hello'
   end
 
   get '/register/:name/:pass', type: :json do |name, pass|
-    # name, pass = body['name'], body['pass']
-    if !name || !pass
-      not_ok 'provide name and password'
-    elsif (name = login_manager.register(name, pass))
+    if (name = login_manager.register(name, pass))
       session[:name] = name
       ok 'successfully registered'
     else
