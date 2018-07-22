@@ -48,6 +48,7 @@ module Codebreaker
     end
 
     def score
+      return @score = 0 unless @state == :won
       @score = @match_history.flatten.count('+')
       @score += @match_history.flatten.count('-') * 0.5
       @score /= (@tries + 1) * 4
