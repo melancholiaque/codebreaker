@@ -16,10 +16,10 @@ module Codebreaker
       :nightmare => { tries: 1, score_multiplier: 5 }
     }.freeze
 
-    def initialize(player_name, dificulty)
+    def initialize(player_name, dificulty, file = 'codebreaker_score.txt')
       raise 'invalid name' unless player_name =~ /^[A-Za-z]{3,20}$/
       @player_name = player_name
-      initialize_game(dificulty.to_s.rstrip)
+      initialize_game(dificulty.to_s.rstrip, file)
     end
 
     def play_again(dificulty = nil)
@@ -44,16 +44,17 @@ module Codebreaker
     def score
       @score = @match_history.flatten.count('+')
       @score += @match_history.flatten.count('-') * 0.5
-      @score /= (@max_tries * 4)
+      @score /= (@tries * 4)
       @score *= @coof * 100
       @score = @score.floor
     end
 
-    def save_score(file = @score_file)
+    def save_score(file = @score_file_path)
       raise 'win first' if @state != :won
-      score
-      file = File.new(file, 'a') if file.is_a? String
-      file.puts("#{@player_name}:#{@dificulty}:#{@score}")
+      raise 'no score file given' unless file
+      File.open(file, 'a') do |file|
+        file.puts("#{@player_name}:#{@dificulty}:#{score}")
+      end
     end
 
     private
@@ -79,11 +80,7 @@ module Codebreaker
       @coof = DIFFICULTY[dificulty][:score_multiplier]
       @match_history, @guess_history = [], []
       @score = 0
-      @score_file = if file&.is_a?(File)
-                      file
-                    else
-                      File.new('codebreaker_score.txt', 'a')
-                    end
+      @score_file_path = file&.is_a?(File) ? file.path : file
     end
 
     def rand6
