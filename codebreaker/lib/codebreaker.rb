@@ -52,8 +52,11 @@ module Codebreaker
     def save_score(file = @score_file_path)
       raise 'win first' if @state != :won
       raise 'no score file given' unless file
-      File.open(file, 'a') do |file|
-        file.puts("#{@player_name}:#{@dificulty}:#{score}")
+      unless @score_saved
+        File.open(file, 'a') do |file|
+          file.puts("#{@player_name}:#{@dificulty}:#{score}")
+        end
+        @score_saved = true
       end
     end
 
@@ -79,7 +82,7 @@ module Codebreaker
       @tries = DIFFICULTY[dificulty][:tries]
       @coof = DIFFICULTY[dificulty][:score_multiplier]
       @match_history, @guess_history = [], []
-      @score = 0
+      @score, @score_saved = 0, false
       @score_file_path = file&.is_a?(File) ? file.path : file
     end
 
