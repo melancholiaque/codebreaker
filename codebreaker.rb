@@ -58,13 +58,19 @@ Foo.define do
     end
   end
 
+  get '/score' do
+    with_current_game do |game|
+      ok game.score
+    end
+  end
+
   get '/scores' do
     File.open(score_file, 'r', &:read) rescue not_ok 'no scores yet'
   end
 
   get '/hint' do
     login_required
-    with_current_game(&:hint)
+    ok with_current_game(&:hint)
   end
 
   get '/sign_up/:name/:pass' do |name, pass|
