@@ -47,7 +47,7 @@ module Codebreaker
     def score
       @score = @match_history.flatten.count('+')
       @score += @match_history.flatten.count('-') * 0.5
-      @score /= (@tries * 4)
+      @score /= (@tries + 1) * 4
       @score *= @coof * 100
       @score = @score.floor
     end
