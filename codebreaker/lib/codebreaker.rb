@@ -39,9 +39,12 @@ module Codebreaker
     end
 
     def hint
-      @coof = [0, @coof-1].max
-      val = rand(0..3)
-      '    '.tap { |s| s[val] = @code[val].to_s }
+      unless @hint_taken
+        @hint_taken = true
+        @coof = [0, @coof-1].max
+        val = rand(0..3)
+        '    '.tap { |s| s[val] = @code[val].to_s }
+      end
     end
 
     def score
@@ -86,6 +89,7 @@ module Codebreaker
       @coof = DIFFICULTY[dificulty][:score_multiplier]
       @match_history, @guess_history = [], []
       @score, @score_saved = 0, false
+      @hint_taken = false
       @score_file_path = file&.is_a?(File) ? file.path : file
     end
 
