@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'json'
 require 'gdbm'
 require 'digest'
@@ -25,7 +26,12 @@ module Foo
 
     def attach(**kwargs)
       kwargs.each_pair do |k, v|
-        define_singleton_method(k) { v }
+        if v.is_a? Proc
+          p k, v
+          define_singleton_method(k, &v)
+        else
+          define_singleton_method(k) { v }
+        end
       end
     end
 
@@ -81,17 +87,23 @@ module Foo
 
     def initialize
       @paths = Hash.new { |h, v| h[v] = [] }
-      @auth_manager = AuthManager.new('test')
+      @default_type = :text
+      @attachments = {}
+    end
+
+    def default_type(type)
+      @default_type = type
     end
 
     def call(env)
       hold = Holder.from_request(Rack::Request.new(env))
-      hold.attach(login_manager: @auth_manager)
+      p @attachments
+      hold.attach(**@attachments)
       hd, cb, conv = hold.callback_from(@paths)
       return the_404 unless cb
       [200, hd, [cb.call.send(conv)]]
     rescue Forbiden
-      [403, hd, ['Forbiden']]
+      [403, { 'Content-Type' => 'text/plain' }, ['Forbiden']]
     end
 
     def make_regex(path)
@@ -100,11 +112,16 @@ module Foo
 
     %i[get post].each do |method|
       define_method(method) do |path, **kwargs, &block|
-        conv, cont = CONVERTERS[kwargs[:type] || :text]
+        conv, cont = CONVERTERS[kwargs[:type] || @default_type]
         @paths['GET'] << [
           make_regex(path), { 'Content-Type' => cont }, block, conv
         ]
       end
+    end
+
+    def set(name = nil, value = nil, **kwargs, &block)
+      return @attachments.merge!(kwargs) unless kwargs.empty?
+      @attachments[name] = block || value
     end
 
     def the_404
