@@ -60,7 +60,7 @@ module Foo
   # handles authorization
   class AuthManager
     def initialize(name = nil)
-      @store = name ? GDBM.new("#{name}.db") : {}
+      @store = name ? GDBM.new(name) : {}
       @key = [Time.now, rand].join
     end
 

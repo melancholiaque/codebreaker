@@ -1,4 +1,3 @@
-# coding: utf-8
 require_relative 'foo'
 require 'codebreaker'
 require 'pstore'
@@ -6,49 +5,43 @@ require 'pstore'
 Foo.define do
 
   default_type :json
+
   set game_store: PStore.new('codebreaker_games.pstore')
-  set login_manager: Foo::AuthManager.new('test')
+  set login_manager: Foo::AuthManager.new('test.db')
+  set score_file: 'codebreaker_score.txt'
+
   set(:ok) { |content, **kw| { status: :ok, content: content || kw } }
   set(:not_ok) { |msg| { status: :fail, msg: msg } }
+  set(:name) { session[:name] }
+  set(:invalid) { |name, pass| !([name, pass].all? { |c| /^\w{3,20}$/ =~ c }) }
 
-  set :wrap do |&block|
+  set :with_current_game do |&block|
     begin
-      block.yield
+      game_store.transaction do
+        game = game_store[name]
+        game ? block[game] : not_ok('start game first')
+      end
     rescue RuntimeError => e
       not_ok e.message
     end
   end
 
-  set :with_current_game do |&block|
-    game_store.transaction do
-      block[game_store[session[:name]]]
-    end
-  end
-
   set :new_game do |difficulty|
-    wrap do
-      with_current_game do |game|
+    begin
+      game_store.transaction do
+        game = game_store[name]
         if game
           game.play_again(difficulty)
         else
-          game_store[session[:name]] = Codebreaker::Game.new(
-            session[:name],
-            difficulty
-          )
+          args = name, difficulty, score_file
+          game_store[name] = Codebreaker::Game.new(*args)
         end
+        p game_store[name].instance_variable_get("@code".to_sym)
         ok 'ready to play'
       end
+    rescue RuntimeError => e
+      not_ok e.message
     end
-  end
-
-  get '/', type: :text do
-    <<-EOS
-    welcome to codebreaker version of the game
-    API schema:
-    /sign_in/:name/:pass
-    /sign_up/:name/:pass
-    /start_game/:difficulty
-    EOS
   end
 
   get '/start_game/:diff' do |diff|
@@ -65,8 +58,19 @@ Foo.define do
     end
   end
 
-  get '/sign_in/:name/:pass' do |name, pass|
-    if (name = login_manager.register(name, pass))
+  get '/scores' do
+    File.open(score_file, 'r', &:read) rescue not_ok 'no scores yet'
+  end
+
+  get '/hint' do
+    login_required
+    with_current_game(&:hint)
+  end
+
+  get '/sign_up/:name/:pass' do |name, pass|
+    if invalid(name, pass)
+      not_ok 'invalid name and/or pass'
+    elsif (name = login_manager.register(name, pass))
       session[:name] = name
       ok 'registered'
     else
@@ -74,7 +78,7 @@ Foo.define do
     end
   end
 
-  get '/sign_up/:name/:pass' do |name, pass|
+  get '/sign_in/:name/:pass' do |name, pass|
     if (name = login_manager.verify(name, pass))
       session[:name] = name
       ok 'logged in'
