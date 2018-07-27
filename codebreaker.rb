@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative 'foo'
 require 'codebreaker'
 require 'pstore'
@@ -29,14 +30,12 @@ Foo.define do
   set :new_game do |difficulty|
     begin
       game_store.transaction do
-        game = game_store[name]
-        if game
-          game.play_again(difficulty)
+        if game_store[name]
+          game_store[name].play_again(difficulty)
         else
           args = name, difficulty, score_file
           game_store[name] = Codebreaker::Game.new(*args)
         end
-        p game_store[name].instance_variable_get("@code".to_sym)
         ok 'ready to play'
       end
     rescue RuntimeError => e
@@ -44,12 +43,12 @@ Foo.define do
     end
   end
 
-  get '/start_game/:diff' do |diff|
+  post '/start_game/:diff' do |diff|
     login_required
     new_game diff
   end
 
-  get '/turn/:guess' do |guess|
+  post '/turn/:guess' do |guess|
     login_required
     with_current_game do |game|
       state, match = game.turn(guess.to_s)
@@ -58,14 +57,22 @@ Foo.define do
     end
   end
 
+  get '/current_state' do
+    login_required
+    with_current_game do |game|
+      ok match: game.current_match.join(''), guess: game.guess
+    end
+  end
+
   get '/score' do
+    login_required
     with_current_game do |game|
       ok game.score
     end
   end
 
   get '/scores' do
-    File.open(score_file, 'r', &:read) rescue not_ok 'no scores yet'
+    ok (File.open(score_file, 'r', &:read) rescue not_ok 'no scores yet')
   end
 
   get '/hint' do
@@ -73,23 +80,18 @@ Foo.define do
     ok with_current_game(&:hint)
   end
 
-  get '/sign_up/:name/:pass' do |name, pass|
+  post '/begin' do
+    name, pass = body['name'], body['pass']
     if invalid(name, pass)
       not_ok 'invalid name and/or pass'
-    elsif (name = login_manager.register(name, pass))
-      session[:name] = name
-      ok 'registered'
+    elsif (name1 = login_manager.register(name, pass))
+      session[:name] = name1
+      ok 'signed up'
+    elsif (name2 = login_manager.verify(name, pass))
+      session[:name] = name2
+      ok 'signed in'
     else
       not_ok 'such user already exists'
-    end
-  end
-
-  get '/sign_in/:name/:pass' do |name, pass|
-    if (name = login_manager.verify(name, pass))
-      session[:name] = name
-      ok 'logged in'
-    else
-      not_ok 'invalid creditnails'
     end
   end
 end

@@ -1,7 +1,6 @@
 require_relative 'codebreaker'
 
 app = Rack::Builder.new do
-  use Rack::ShowExceptions
   use Rack::Static, urls: { '/' => 'index.html' }, root: 'static'
   use Rack::Session::Cookie,
       key: 'codebreaker_session',

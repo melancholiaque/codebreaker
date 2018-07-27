@@ -1,4 +1,3 @@
-# coding: utf-8
 require 'json'
 require 'gdbm'
 require 'digest'
@@ -16,7 +15,8 @@ module Foo
     end
 
     def self.from_request(req)
-      body = JSON.parse(req.body.read) rescue req.body.read
+      body = req.body.read.to_s
+      body = JSON.parse(body) rescue body
       params = req.params
       session = req.session
       method = req.request_method
@@ -71,8 +71,8 @@ module Foo
     end
 
     def verify(name, pass)
-      return nil unless name || pass
-      @store[name] == Digest::MD5.hexdigest(pass) ? name : nil
+      return nil unless name && pass
+      (@store[name] == Digest::MD5.hexdigest(pass)) ? name : nil
     end
   end
 
@@ -111,7 +111,7 @@ module Foo
     %i[get post].each do |method|
       define_method(method) do |path, **kwargs, &block|
         conv, cont = CONVERTERS[kwargs[:type] || @default_type]
-        @paths['GET'] << [
+        @paths[method.to_s.upcase] << [
           make_regex(path), { 'Content-Type' => cont }, block, conv
         ]
       end
@@ -123,7 +123,7 @@ module Foo
     end
 
     def the_404
-      [404, { 'Content-Type' => 'text/plain' }, ['whoopsie']]
+      [404, { 'Content-Type' => 'text/plain' }, ['404']]
     end
   end
 
