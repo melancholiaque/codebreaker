@@ -1,23 +1,2 @@
 # Codebreaker
-
-## Installation
-```
-git clone -b feature/codebreaker_gem https://github.com/melancholiaque/codebreaker
-cd codebreaker/codebreaker
-bundle install
-rake spec
-rake install
-```
-
-## Usage
-Assuming you are in the same folder.
-```
-ruby ../minimal_game.rb
-chose name
-easy   
-chose difficulty
-nightmare
-5212
-++++
-won: 500
-```
+Actual gem [README](https://github.com/melancholiaque/codebreaker/blob/feature/codebreaker_gem/README.md).
