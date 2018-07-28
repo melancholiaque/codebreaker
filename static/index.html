@@ -1,0 +1,487 @@
+<html>
+
+  <head>
+    <title> Codebreaker </title>
+    <style type="text/css">
+
+      body {
+      background-color: #474747;
+      }
+
+      .hidden {
+      display: none;
+      }
+
+      .visible {
+      display: block;
+      }
+
+      .inlined {
+      display: inline-block;
+      }
+
+      .scores {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      position: absolute;
+      margin-left: -45%;
+      padding: 3%;
+      background-color: #00dd85;
+      }
+
+      .login_form {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      padding-top: 3%;
+      padding-bottom: 3%;
+      background-color: #00dd85;
+      }
+
+      .login_submit, .name, .password {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      }
+
+      .center {
+      margin: auto;
+      width: 40%;
+      }
+
+      .leftbtn {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      height: 5%;
+      width: 10%;
+      margin: 1% 5% 5% 5%;
+      position: absolute;
+      }
+
+      .result {
+      background-color: #00dd85;
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      height: 5%;
+      width: 10%;
+      margin: 10% 5% 5% 5%;
+      position: absolute;
+      }
+
+      .score {
+      background-color: #00dd85;
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      height: 5%;
+      width: 10%;
+      margin: 10% 5% 5% 25%;
+      position: absolute;
+      }
+
+      .diff {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      margin-left: 65%;
+      margin-top: 3%;
+      height: 50%;
+      width: 20%;
+      background-color: #00dd85;
+      }
+
+      .leftbtn:active {
+      box-shadow: 0px 0px;
+      margin-top: 1.5%;
+      margin-left: 5.5%;
+      }
+
+      .rightbtn {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      height: 5%;
+      width: 10%;
+      margin: 1% 5% 5% 25%;
+      position: absolute;
+      }
+
+      .rightbtn:active {
+      box-shadow: 0px 0px;
+      margin-top: 1.5%;
+      margin-left: 25.5%;
+      }
+
+
+      .Half{
+      width: 29%;
+      margin-top: 3%;
+      margin-left: 10%;
+      margin-right: 10%;
+      }
+
+      .centered {
+      text-align: center;
+      }
+
+      .code {
+      width: 40%;
+      background-color: #00dd85;
+      box-shadow: 10px 10px;
+      padding: 2% 0% 0% 0%;
+      height: 55%;
+      }
+
+      .lower, .upper {
+      posiaiton: absolute;
+      background-color: #00dd85;
+      box-shadow: 10px 10px;
+      margin-top: 2%;
+      padding: 0% 0% 0% 0%;
+      height: 10%;
+      }
+
+      .code {
+      position: relative;
+      border: solid 1px;
+      }
+
+      .submit, .hint {
+      border: solid 1px;
+      }
+
+      .digit_container {
+      width: 100px;
+      height: 100%;
+      margin-top: 0%;
+      display: inline-block;
+      position: relative;
+      }
+
+      .digit_control {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      height: 20%;
+      text-align: center;
+      margin: 5% 5% 5% 5%;
+      position: absolute;
+      width: 90%;
+      }
+
+      .upper_digit_control:active {
+      box-shadow: 0px 0px;
+      margin-left: 7%;
+      margin-right: 3%;
+      margin-top: 10%;
+      margin-bottom: 0%;
+      }
+
+      .lower_digit_control:active {
+      box-shadow: 0px 0px;
+      margin-left: 7%;
+      margin-right: 3%;
+      margin-top: 10%;
+      margin-bottom: 0%;
+      position: absolute;
+      }
+
+      .digit, .match {
+      box-shadow: 7px 7px;
+      height: 15%;
+      text-align: center;
+      font-size: 300%;
+      margin: 5px;
+      border: solid 1px;
+      }
+
+      .noselect {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      }
+    </style>
+    <script>
+
+const tries_of = {
+    "baby": Infinity,
+    "easy": 10 ,
+    "normal": 8,
+    "hard": 5,
+    "very_hard": 3,
+    "nightmare": 1
+};
+
+      const req = (method, query, body, callback) => {
+          var xhr = new XMLHttpRequest();
+          xhr.onload = () => {
+              try {
+                  const resp = JSON.parse(xhr.responseText);
+                  if(xhr.status != 200 || resp.status != 'ok') {
+                      alert(resp.msg);
+                  } else {
+                      callback(resp);
+                  }
+              } catch(err) {
+                  document.getElementById("login").className="visible";
+                  return;
+              }
+          };
+          xhr.open(method, query, true);
+          if(Object.keys(body).length !== 0)  {
+              xhr.setRequestHeader("Content-Type", "application/javascript");
+              body = JSON.stringify(body);
+          }
+          xhr.send(body);
+      };
+
+      const change = (dir, id) => {
+          var elem = document.getElementById(id);
+          if(+elem.innerHTML == 6 && dir == 1) dir = -5;
+          if(+elem.innerHTML == 1 && dir == -1) dir = +5;
+          elem.innerHTML = +elem.innerHTML + dir;
+      };
+
+      const get_guess = () => {
+          return (['i0', 'i1', 'i2', 'i3']
+                  .map((id) => document.getElementById(id).innerHTML)
+                  .join(''));
+      };
+
+      const display_match = (match) => {
+          for (var i in match) {
+              const m = match[i];
+              document.getElementById("m"+i).innerHTML = m == ' ' ? '?' : m;
+              if (match[i] == '+') freeze_digit(i);
+          }
+      };
+
+      const accept_score = (resp) => {
+          const score = resp.content;
+          document.getElementById("score").className = "score centered";
+          document.getElementById("score").innerHTML = "<br>Score: " + score;
+          show_scores();
+      }
+
+      const accept_turn = (resp) => {
+          const [state, match] = [resp.content.state, resp.content.match];
+          document.getElementById("tries").innerHTML -= 1;
+          display_match(match);
+          if(state != 'next') {
+              [0, 1, 2, 3].map(freeze_digit);
+              document.getElementById("result").className = "result centered";
+              document.getElementById("result").innerHTML = "<br>You " + state;
+              req("GET", "/score", {}, accept_score);
+          }
+      };
+
+      const turn = () => {
+          const guess = get_guess();
+          req("POST", "/turn/"+guess, {}, accept_turn);
+      };
+
+      const freeze_digit = (n) => {
+          var btns = ["u"+n, "d"+n].map((id) => document.getElementById(id));
+          btns.map((b) => b.onclick = "");
+      };
+
+      const clear = (resp) => {
+          if (resp.status != "ok") return;
+          [0, 1, 2, 3].map((i) => document.getElementById("i" + i).innerHTML = "1");
+          [0, 1, 2, 3].map((i) => document.getElementById("m" + i).innerHTML = "?");
+          document.getElementById("result").innerHTML = "";
+          document.getElementById("score").innerHTML = "";
+          document.getElementById("result").className = "hidden";
+          document.getElementById("score").className = "hidden";
+      };
+
+      const accept_hint = (resp) => {
+          const cont = resp.content;
+          for(var i in cont) {
+              if(cont[i] != " ") {
+                  document.getElementById("i"+i).innerHTML = cont[i];
+                  document.getElementById("m"+i).innerHTML = '+';
+                  freeze_digit(i);
+                  break;
+              }
+          }
+      };
+
+      const hint = () => {
+          req("GET", "/hint/", {}, accept_hint);
+      };
+
+      const get_difficulty = () => {
+          return document.getElementById("difficulty").value;
+      };
+
+      const new_game = () => {
+          const difficulty = get_difficulty();
+          [0, 1, 2, 3].map((i) => {
+              document.getElementById("u"+i).onclick = (() => change(1, 'i'+i));
+              document.getElementById("d"+i).onclick = (() => change(-1, 'i'+i));
+          })
+          document.getElementById("tries").innerHTML = tries_of[difficulty];
+          req("POST", "/start_game/"+difficulty, {}, clear)
+      };
+
+      const accept_state = (resp) => {
+          if(resp.status != "ok") {
+              alert(resp.content);
+          }
+          const [match, guess] = [resp.content.match, resp.content.guess];
+          handle_begin();
+          for (var i in match) {
+              const m = match[i];
+              document.getElementById("m"+i).innerHTML = m == ' ' ? '?' : m;
+              document.getElementById("i"+i).innerHTML = guess[i];
+          }
+      };
+
+      const handle_begin = (resp) => {
+          document.getElementById("login").className="hidden";
+          document.getElementById("game").className="visible";
+          show_scores();
+      };
+
+      const accept_show_scores = (resp) => {
+          const scores = resp.content.split('\n').join('<br>');
+          console.log(scores);
+          document.getElementById("scores").innerHTML = scores;
+      };
+
+      const show_scores = () => {
+          req("GET", "/scores", {}, accept_show_scores);
+      };
+
+      const login = () => {
+          const [name, pass] =  ["name", "password"].map((x) => document.getElementById(x).value);
+          if(name.match(/[\w]{3, 20}/) && pass.match(/[\w]{3, 20}/)) {
+              alert('invalid log/pass');
+          } else {
+              req("POST", "/begin", {"name": name, "pass": pass}, handle_begin);
+          }
+      };
+    </script>
+  </head>
+
+  <body onload="req('GET', '/current_state', {}, accept_state);">
+    <div id="login" class="hidden">
+      <div id="login_form" class="center centered login_form">
+        <h1>Codebreaker</h1>
+        <br>
+        <input class="name" id="name" placeholder="type your name hare">
+        <input class="password" id="password" placeholder="type your passwod here">
+        <button class="login_submit" onclick="login();">Submit</button>
+      </div>
+    </div>
+    <div id="game" class="hidden">
+    <div class="upper center centred">
+      <div class="inlined leftbtn centered" onclick="new_game();">
+        <br>
+        New game
+      </div>
+      <select id="difficulty" class="diff">
+        <option value="baby">baby</option>
+        <option value="easy">easy</option>
+        <option value="normal">normal</option>
+        <option value="hard">hard</option>
+        <option value="very_hard">very_hard</option>
+        <option value="nightmare">nightmare</option>
+      </select>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="code centered center">
+      <div id="scores" class="scores"> scores </div>
+      <div id="tries">tries</div><br>
+        <div class="digit_container">
+          <div id="u0" class="digit_control noselect upper_digit_control" onclick="change(1, 'i0')">
+            <font size="100%">&uArr;</font>
+          </div>
+          <p>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <div id="i0" class="digit noselect">1</div>
+            <div id="m0" class="match noselect">?</div>
+          </p>
+          <div id="d0" class="digit_control noselect lower_digit_control" onclick="change(-1, 'i0')">
+            <font size="100%">&dArr;</font>
+          </div>
+        </div><!--
+
+     --><div class="digit_container">
+          <div id="u1" class="digit_control noselect upper_digit_control" onclick="change(1, 'i1')">
+            <font size="100%">&uArr;</font>
+          </div>
+          <p>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+          <div id="i1" class="digit noselect">1</div>
+          <div id="m1" class="match noselect">?</div>
+          </p>
+          <div id="d1" class="digit_control noselect lower_digit_control" onclick="change(-1, 'i1')">
+            <font size="100%">&dArr;</font>
+          </div>
+        </div><!--
+
+     --><div class="digit_container">
+          <div id="u2" class="digit_control noselect upper_digit_control" onclick="change(1, 'i2')">
+            <font size="100%">&uArr;</font>
+          </div>
+          <p>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+          <div id="i2" class="digit noselect">1</div>
+          <div id="m2" class="match noselect">?</div>
+          </p>
+          <div id="d2" class="digit_control noselect lower_digit_control" onclick="change(-1, 'i2')">
+            <font size="100%">&dArr;</font>
+          </div>
+        </div><!--
+
+     --><div class="digit_container">
+          <div id="u3" class="digit_control noselect upper_digit_control" onclick="change(1, 'i3')">
+            <font size="100%">&uArr;</font>
+          </div>
+          <p>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+          <div id="i3" class="digit noselect">1</div>
+          <div id="m3" class="match noselect">?</div>
+          </p>
+          <div id="d3" class="digit_control noselect lower_digit_control" onclick="change(-1, 'i3')">
+            <font size="100%">&dArr;</font>
+          </div>
+        </div>
+      </div>
+      <div class="lower center">
+        <div class="submit centered noselect leftbtn" onclick="turn();">
+          <br>
+          submit
+        </div>
+        <div class="hint centered noselect rightbtn" onclick="hint();">
+          <br>
+          hint
+        </div>
+        <div id="result" class="hidden"></div>
+        <div id="score" class="hidden"></div>
+      </div>
+      </div>
+  </body>
+</html>
