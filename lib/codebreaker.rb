@@ -6,6 +6,7 @@ module Codebreaker
   # codebreaker
   class Game
     using ArrayExtensions
+    attr_reader :current_match, :guess
 
     DIFFICULTY = {
       :baby => { tries: Float::INFINITY, score_multiplier: 0},
@@ -39,12 +40,16 @@ module Codebreaker
     end
 
     def hint
-      @coof = [0, @coof-1].max
-      val = rand(0..3)
-      '    '.tap { |s| s[val] = @code[val].to_s }
+      unless @hint_taken
+        @hint_taken = true
+        @coof = [0, @coof-1].max
+        val = rand(0..3)
+        '    '.tap { |s| s[val] = @code[val].to_s }
+      end
     end
 
     def score
+      return @score = 0 unless @state == :won
       @score = @match_history.flatten.count('+')
       @score += @match_history.flatten.count('-') * 0.5
       @score /= (@tries + 1) * 4
@@ -86,6 +91,7 @@ module Codebreaker
       @coof = DIFFICULTY[dificulty][:score_multiplier]
       @match_history, @guess_history = [], []
       @score, @score_saved = 0, false
+      @hint_taken = false
       @score_file_path = file&.is_a?(File) ? file.path : file
     end
 
