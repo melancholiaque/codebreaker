@@ -6,7 +6,7 @@ module Codebreaker
   # codebreaker
   class Game
     using ArrayExtensions
-    attr_reader :current_match, :guess, :tries, :difficulty
+    attr_reader :current_match, :guess, :tries, :difficulty, :state
 
     DIFFICULTY = {
       :baby => { tries: Float::INFINITY, score_multiplier: 0},
