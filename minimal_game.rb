@@ -1,4 +1,4 @@
-require_relative 'codebreaker'
+require 'codebreaker'
 
 pgets = ->(msg) { (puts msg) || gets.rstrip }
 name = -> { pgets['chose name'] }
