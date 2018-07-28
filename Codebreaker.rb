@@ -59,11 +59,12 @@ Foo.define do
   get '/current_state' do
     login_required
     with_current_game do |game|
-      p game
       ok match: game.current_match&.join(''),
-         guess: game.guess,
-         #tries: game.tries,
-         difficulty: game.difficulty
+         guess: game.guess || [1]*4,
+         tries: game.tries.to_s,
+         difficulty: game.difficulty,
+         state: game.state,
+         score: game.score
     end
   end
 

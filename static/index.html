@@ -217,7 +217,6 @@
                   return;
               }
               const resp = JSON.parse(xhr.responseText);
-              console.log(resp.content);
               if(xhr.status == 200 && resp.status == 'ok') {
                   callback(resp);
               } else {
@@ -267,7 +266,8 @@
 
       const accept_turn = (resp) => {
           const [state, match] = [resp.content.state, resp.content.match];
-          document.getElementById("tries").innerHTML -= 1;
+          var tries = document.getElementById("tries")
+          tries.innerHTML -= tries.innerHTML == '0' ? 0 : 1;
           display_match(match);
           if(state != 'next') {
               [0, 1, 2, 3].map(freeze_digit);
@@ -327,12 +327,13 @@
           req("POST", "/start_game/"+difficulty, {}, clear)
       };
 
-const accept_state = (resp) => {
+      const accept_state = (resp) => {
           if(resp.status != "ok") {
               alert(resp.msg);
           }
-          const [match, guess] = [resp.content.match, resp.content.guess];
-          handle_begin();
+          const c = resp.content;
+          const [match, guess, tries, diff, state] = [c.match, c.guess, c.tries, c.difficulty, c.state];
+          handle_begin(c);
           for (var i in match) {
               const m = match[i];
               document.getElementById("m"+i).innerHTML = m == ' ' ? '?' : m;
@@ -343,12 +344,23 @@ const accept_state = (resp) => {
       const handle_begin = (resp) => {
           document.getElementById("login").className="hidden";
           document.getElementById("game").className="visible";
+          const getter = (e) => document.getElementById(e);
+          console.log(resp.guess);
+          if(resp.state != 'next') {
+              var [e1, e2, e3, e4] = ["score", "result", "tries", "difficulty"].map(getter);
+              e1.className = "score centered";
+              e2.className = "result centered";
+              e1.innerHTML = "<br>Score: " + resp.score;
+              e2.innerHTML = "<br>You " + resp.state;
+              e3.innerHTML = resp.tries;
+              e4.value = resp.difficulty;
+          }
           show_scores();
       };
 
       const accept_show_scores = (resp) => {
+          if(resp.content.status == 'fail') return;
           const scores = resp.content.split('\n').join('<br>');
-          console.log(scores);
           document.getElementById("scores").innerHTML = scores;
       };
 
