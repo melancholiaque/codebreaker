@@ -1,0 +1,27 @@
+GIT
+  remote: https://github.com/melancholiaque/codebreaker.git
+  revision: 5e1401b33ba8d752150e379ea09b6d3ee67f9f41
+  branch: feature/codebreaker_gem
+  specs:
+    codebreaker (0.0.1)
+      pry (~> 0.11.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    coderay (1.1.2)
+    method_source (0.9.0)
+    pry (0.11.3)
+      coderay (~> 1.1.0)
+      method_source (~> 0.9.0)
+    rack (2.0.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  codebreaker!
+  rack
+
+BUNDLED WITH
+   1.16.2
