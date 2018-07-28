@@ -2,7 +2,7 @@
 
 ## Installation
 ```
-git clone -b feature/codebreaker_gem https://github.com/melancholiaque/codebreaker
+git clone -b feature/codebreaker https://github.com/melancholiaque/codebreaker
 cd codebreaker/codebreaker
 bundle install
 rake spec
