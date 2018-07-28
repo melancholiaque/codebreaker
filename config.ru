@@ -1,4 +1,4 @@
-require_relative 'codebreaker'
+require 'codebreaker'
 
 app = Rack::Builder.new do
   use Rack::Static, urls: { '/' => 'index.html' }, root: 'static'
