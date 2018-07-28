@@ -200,14 +200,14 @@
     </style>
     <script>
 
-const tries_of = {
-    "baby": Infinity,
-    "easy": 10 ,
-    "normal": 8,
-    "hard": 5,
-    "very_hard": 3,
-    "nightmare": 1
-};
+      const tries_of = {
+          "baby": Infinity,
+          "easy": 10 ,
+          "normal": 8,
+          "hard": 5,
+          "very_hard": 3,
+          "nightmare": 1
+      };
 
       const req = (method, query, body, callback) => {
           var xhr = new XMLHttpRequest();
@@ -217,6 +217,7 @@ const tries_of = {
                   return;
               }
               const resp = JSON.parse(xhr.responseText);
+              console.log(resp.content);
               if(xhr.status == 200 && resp.status == 'ok') {
                   callback(resp);
               } else {
@@ -326,7 +327,7 @@ const tries_of = {
           req("POST", "/start_game/"+difficulty, {}, clear)
       };
 
-      const accept_state = (resp) => {
+const accept_state = (resp) => {
           if(resp.status != "ok") {
               alert(resp.msg);
           }
