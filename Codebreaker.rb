@@ -34,7 +34,7 @@ Foo.define do
         if game_store[name]
           game_store[name].play_again(difficulty)
         else
-          args ← name, difficulty, score_file
+          args = name, difficulty, score_file
           game_store[name] = Codebreaker::Game.new(∙args)
         end
         ok 'ready to play'
