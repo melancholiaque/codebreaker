@@ -212,16 +212,20 @@ const tries_of = {
       const req = (method, query, body, callback) => {
           var xhr = new XMLHttpRequest();
           xhr.onload = () => {
-              try {
-                  const resp = JSON.parse(xhr.responseText);
-                  if(xhr.status != 200 || resp.status != 'ok') {
-                      alert(resp.msg);
-                  } else {
-                      callback(resp);
-                  }
-              } catch(err) {
+              if(xhr.status == 403) {
                   document.getElementById("login").className="visible";
                   return;
+              }
+              const resp = JSON.parse(xhr.responseText);
+              if(xhr.status == 200 && resp.status == 'ok') {
+                  callback(resp);
+              } else {
+                  const game = document.getElementById("game");
+                  if (resp.msg == 'start game first' && game.className=="hidden") {
+                      game.className="visible";
+                      return;
+                  }
+                  alert(resp.msg);
               }
           };
           xhr.open(method, query, true);
@@ -324,7 +328,7 @@ const tries_of = {
 
       const accept_state = (resp) => {
           if(resp.status != "ok") {
-              alert(resp.content);
+              alert(resp.msg);
           }
           const [match, guess] = [resp.content.match, resp.content.guess];
           handle_begin();

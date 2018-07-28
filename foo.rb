@@ -101,7 +101,7 @@ module Foo
       return the_404 unless cb
       [200, hd, [cb.call.send(conv)]]
     rescue Forbiden
-      [403, { 'Content-Type' => 'text/plain' }, ['Forbiden']]
+      the_403
     end
 
     def make_regex(path)
@@ -122,8 +122,18 @@ module Foo
       @attachments[name] = block || value
     end
 
+    CONVERTERS.each_pair do |k, v|
+      define_method "#{k}_type" do
+        { 'Content-Type' => v[1] }
+      end
+    end
+
     def the_404
-      [404, { 'Content-Type' => 'text/plain' }, ['404']]
+      [404, text_type, ['404']]
+    end
+
+    def the_403
+      [403, text_type, ['403']]
     end
   end
 
