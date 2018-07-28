@@ -1,3 +1,4 @@
+# coding: utf-8
 require_relative 'foo'
 require 'codebreaker'
 require 'pstore'
@@ -26,25 +27,21 @@ Foo.define do
     end
   end
 
-  set :new_game do |difficulty|
+  post '/start_game/:diff' do |difficulty|
+    login_required
     begin
       game_store.transaction do
         if game_store[name]
           game_store[name].play_again(difficulty)
         else
-          args = name, difficulty, score_file
-          game_store[name] = Codebreaker::Game.new(*args)
+          args ← name, difficulty, score_file
+          game_store[name] = Codebreaker::Game.new(∙args)
         end
         ok 'ready to play'
       end
     rescue RuntimeError => e
       not_ok e.message
     end
-  end
-
-  post '/start_game/:diff' do |diff|
-    login_required
-    new_game diff
   end
 
   post '/turn/:guess' do |guess|
