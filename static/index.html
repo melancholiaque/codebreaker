@@ -267,7 +267,7 @@
       const accept_turn = (resp) => {
           const [state, match] = [resp.content.state, resp.content.match];
           var tries = document.getElementById("tries")
-          tries.innerHTML -= tries.innerHTML == '0' ? 0 : 1;
+          if(tries.innerHTML != 'Infinity') tries.innerHTML -= +tries.innerHTML == 0 ? 0 : 1;
           display_match(match);
           if(state != 'next') {
               [0, 1, 2, 3].map(freeze_digit);
@@ -345,16 +345,15 @@
           document.getElementById("login").className="hidden";
           document.getElementById("game").className="visible";
           const getter = (e) => document.getElementById(e);
-          console.log(resp.guess);
           if(resp.state != 'next') {
-              var [e1, e2, e3, e4] = ["score", "result", "tries", "difficulty"].map(getter);
+              var [e1, e2, e3, e4] = ["score", "result"].map(getter);
               e1.className = "score centered";
               e2.className = "result centered";
               e1.innerHTML = "<br>Score: " + resp.score;
               e2.innerHTML = "<br>You " + resp.state;
-              e3.innerHTML = resp.tries;
-              e4.value = resp.difficulty;
           }
+          getter("tries").innerHTML = resp.tries;
+          getter("difficulty").value = resp.difficulty;
           show_scores();
       };
 
