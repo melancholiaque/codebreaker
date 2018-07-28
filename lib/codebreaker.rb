@@ -17,15 +17,15 @@ module Codebreaker
       :nightmare => { tries: 1, score_multiplier: 5 }
     }.freeze
 
-    def initialize(player_name, dificulty, file = 'codebreaker_score.txt')
+    def initialize(player_name, difficulty, file = 'codebreaker_score.txt')
       raise 'invalid name' unless player_name =~ /^[A-Za-z]{3,20}$/
       @player_name = player_name
-      initialize_game(dificulty.to_s.rstrip, file)
+      initialize_game(difficulty.to_s.rstrip, file)
     end
 
-    def play_again(dificulty = nil, file = nil)
+    def play_again(difficulty = nil, file = nil)
       initialize_game(
-        dificulty&.to_s&.rstrip || @dificulty,
+        difficulty&.to_s&.rstrip || @difficulty,
         file || @score_file_path
       )
     end
@@ -62,7 +62,7 @@ module Codebreaker
       raise 'no score file given' unless file
       unless @score_saved
         File.open(file, 'a') do |file|
-          file.puts("#{@player_name}:#{@dificulty}:#{score}")
+          file.puts("#{@player_name}:#{@difficulty}:#{score}")
         end
         @score_saved = true
       end
@@ -80,15 +80,15 @@ module Codebreaker
       @guess_history << (@guess = guess)
     end
 
-    def initialize_game(dificulty, file = nil)
-      dificulty = dificulty&.to_sym
-      raise 'invalid dificulty' unless DIFFICULTY.include? dificulty
-      @dificulty = dificulty
+    def initialize_game(difficulty, file = nil)
+      difficulty = difficulty&.to_sym
+      raise 'invalid difficulty' unless DIFFICULTY.include? difficulty
+      @difficulty = difficulty
       @code, @state = rand6, :next
       @unmatched_exactly = nil
-      @max_tries = DIFFICULTY[dificulty][:tries]
-      @tries = DIFFICULTY[dificulty][:tries]
-      @coof = DIFFICULTY[dificulty][:score_multiplier]
+      @max_tries = DIFFICULTY[difficulty][:tries]
+      @tries = DIFFICULTY[difficulty][:tries]
+      @coof = DIFFICULTY[difficulty][:score_multiplier]
       @match_history, @guess_history = [], []
       @score, @score_saved = 0, false
       @hint_taken = false
