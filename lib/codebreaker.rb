@@ -6,7 +6,7 @@ module Codebreaker
   # codebreaker
   class Game
     using ArrayExtensions
-    attr_reader :current_match, :guess, :tries, :difficulty
+    attr_reader :current_match, :guess, :tries, :difficulty, :state, :score
 
     DIFFICULTY = {
       :baby => { tries: Float::INFINITY, score_multiplier: 0},
@@ -87,7 +87,7 @@ module Codebreaker
       difficulty = difficulty&.to_sym
       raise 'invalid difficulty' unless DIFFICULTY.include? difficulty
       @difficulty = difficulty
-      @code, @state = rand6, :next
+      @code, @state, @guess = rand6, :next, nil
       @unmatched_exactly = nil
       @max_tries = DIFFICULTY[difficulty][:tries]
       @tries = DIFFICULTY[difficulty][:tries]
