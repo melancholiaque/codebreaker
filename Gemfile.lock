@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/melancholiaque/codebreaker.git
-  revision: 5e1401b33ba8d752150e379ea09b6d3ee67f9f41
+  revision: 45a78b8062ef0d536a5f3412a78c8fbeedf7492d
   branch: feature/codebreaker_gem
   specs:
     codebreaker (0.0.1)
