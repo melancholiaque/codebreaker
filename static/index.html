@@ -24,7 +24,7 @@
       border: 1px solid;
       box-shadow: 5px 5px;
       position: absolute;
-      margin-left: -45%;
+      margin-left: -55%;
       padding: 3%;
       background-color: #00dd85;
       }
@@ -330,6 +330,7 @@
       const accept_state = (resp) => {
           if(resp.status != "ok") {
               alert(resp.msg);
+              return;
           }
           const c = resp.content;
           const [match, guess, tries, diff, state] = [c.match, c.guess, c.tries, c.difficulty, c.state];
@@ -344,22 +345,27 @@
       const handle_begin = (resp) => {
           document.getElementById("login").className="hidden";
           document.getElementById("game").className="visible";
+          console.log(resp);
           const getter = (e) => document.getElementById(e);
-          if(resp.state != 'next') {
+          if(resp.state && resp.state != 'next') {
               var [e1, e2, e3, e4] = ["score", "result"].map(getter);
               e1.className = "score centered";
               e2.className = "result centered";
               e1.innerHTML = "<br>Score: " + resp.score;
               e2.innerHTML = "<br>You " + resp.state;
           }
-          getter("tries").innerHTML = resp.tries;
-          getter("difficulty").value = resp.difficulty;
+          getter("tries").innerHTML = resp.tries || "tries";
+          getter("difficulty").value = resp.difficulty || "baby";
           show_scores();
       };
 
       const accept_show_scores = (resp) => {
           if(resp.content.status == 'fail') return;
-          const scores = resp.content.split('\n').join('<br>');
+          const helper = (e) => {
+              const [name, diff, score] = e.split(':');
+              return "<div style='border: 1px solid;'>" + name +'<br>'+diff+' - '+score+'</div>';
+          };
+          const scores = resp.content.split('\n').filter(w => w.length > 1).map(helper).join('<br>');
           document.getElementById("scores").innerHTML = scores;
       };
 
