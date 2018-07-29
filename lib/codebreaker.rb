@@ -43,7 +43,10 @@ module Codebreaker
       unless @hint_taken
         @hint_taken = true
         @coof = [0, @coof-1].max
-        val = rand(0..3)
+        matches = @guess_history.transpose.zip(@code).map { |seq, dig| seq.include? dig }
+        hints = matches.zip((0..3)).select { |match, position| !match}.map(&:last)
+        return nil if hints.count == 1
+        val = hints.sample
         '    '.tap { |s| s[val] = @code[val].to_s }
       end
     end
