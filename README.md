@@ -1,23 +1,7 @@
-# Codebreaker
+# Codebreaker (Heroku deploy version)
 
-## Installation
-```
-git clone -b feature/codebreaker_gem https://github.com/melancholiaque/codebreaker
-cd codebreaker/codebreaker
-bundle install
-rake spec
-rake install
-```
 
-## Usage
-Assuming you are in the same folder.
-```
-ruby ../minimal_game.rb
-chose name
-easy   
-chose difficulty
-nightmare
-5212
-++++
-won: 500
-```
+## Deploy
+Just push the content of this repo to heroku, bundle and rackup will be run automatically.
+
+You can find gem itself [here](https://github.com/melancholiaque/codebreaker/tree/feature/codebreaker_gem) and web application code [here](https://github.com/melancholiaque/codebreaker/tree/feature/sinatra-functionality).
