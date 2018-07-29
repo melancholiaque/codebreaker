@@ -29,6 +29,17 @@
       background-color: #00dd85;
       }
 
+      .about {
+      border: 1px solid;
+      box-shadow: 5px 5px;
+      position: absolute;
+      margin-left: 75%;
+      margin-top: -50%;
+      padding: 1%;
+      width: 20%;
+      background-color: #00dd85;
+      }
+
       .login_form {
       border: 1px solid;
       box-shadow: 5px 5px;
@@ -108,7 +119,7 @@
       }
 
 
-      .Half{
+      .half{
       width: 29%;
       margin-top: 3%;
       margin-left: 10%;
@@ -184,7 +195,7 @@
       box-shadow: 7px 7px;
       height: 15%;
       text-align: center;
-      font-size: 300%;
+      font-size: 200%;
       margin: 5px;
       border: solid 1px;
       }
@@ -503,6 +514,30 @@
         <div id="result" class="hidden"></div>
         <div id="score" class="hidden"></div>
       </div>
+      <div class="about">
+        <p>
+          Cobereaker is a variation of
+          <a href="https://en.wikipedia.org/wiki/Mastermind_(board_game)">mastermind game</a>.<br>
+          You should unravel the code that other player (in this case computer) generated.<br>
+          It consists of 4 digits from 1 to 6.<br>
+          You win if code is unraveled or lose if you run out of tries.<br>
+          Different difficulties yields different amount of tries and score multipliers.<br>
+          You can ask game to unravel one digit (unless it is only one left) by pressing "hint",
+          this will decrease your final score.<br>
+          <br>
+          <br>
+          "?" - means that there is no match with actual code.
+          <br>
+          <br>
+          "-" - means that corresponding digit present in code, but in different position.
+          <br>
+          <br>
+          "+" - means that you unravel corresponding digit, well done!
+          <br>
+          <br>
+          Goos luck, codebreaker.
+        </p>
       </div>
+    </div>
   </body>
 </html>
